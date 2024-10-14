@@ -10,18 +10,18 @@ public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(4);
 
-        List<Future<RetutnPair>> futureList = Collections.synchronizedList(new ArrayList<>());
+        List<Future<ReturnPair>> futureList = Collections.synchronizedList(new ArrayList<>());
 
 
         futureList.add(executorService.submit(createFactorialTask(5)));
         futureList.add(executorService.submit(createFactorialTask(10)));
         futureList.add(executorService.submit(createFactorialTask(15)));
 
-        for (Future<RetutnPair> future : futureList) {
+        for (Future<ReturnPair> future : futureList) {
             if (future.isCancelled()) {
                 System.out.println("Task was cancelled");
             } else {
-                RetutnPair res = future.get();
+                ReturnPair res = future.get();
                 System.out.println("Factorial of " + res.number + " is " + res.factorialResult);
             }
         }
@@ -31,22 +31,22 @@ public class Main {
         executorService.shutdown();
     }
 
-    static class RetutnPair {
+    static class ReturnPair {
         int number;
         BigInteger factorialResult;
 
-        public RetutnPair(int number, BigInteger factorialResult) {
+        public ReturnPair(int number, BigInteger factorialResult) {
             this.number = number;
             this.factorialResult = factorialResult;
         }
     }
 
-    public static Callable<RetutnPair> createFactorialTask(int number) {
+    public static Callable<ReturnPair> createFactorialTask(int number) {
         return () -> {
             BigInteger factorial = getOrComputeFactorial(number);
             factorialMap.putIfAbsent(number, factorial);
             System.out.println("Thread finished: " + Thread.currentThread().getName());
-            return new RetutnPair(number, factorial);
+            return new ReturnPair(number, factorial);
         };
     }
 
