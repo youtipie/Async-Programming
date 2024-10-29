@@ -1,9 +1,5 @@
-# Ignore everything except reamde and .gitignore
-*
 
-!README.md
-!.gitignore
-!src/
-!src/**
-
+.idea/
 src/TestProjects/
+AsyncProgramming.iml
+out/
