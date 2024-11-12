@@ -28,7 +28,7 @@ public class Main {
         }
         System.out.println("Work Stealing час виконання: " + (endTimeStealing - startTimeStealing) + " ms");
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
         long startTimeDealing = System.currentTimeMillis();
         int resultDealing = WorkDeal.findMinWithWorkDealing(executorService, matrix.matrix, targetValue);
         long endTimeDealing = System.currentTimeMillis();

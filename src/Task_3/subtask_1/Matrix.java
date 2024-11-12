@@ -1,7 +1,6 @@
 package Task_3.subtask_1;
 
 import java.util.Random;
-import java.util.stream.IntStream;
 
 public class Matrix {
     private static final int MAX_RANDOM_VALUE = 1000;
@@ -22,9 +21,13 @@ public class Matrix {
 
     public void generateMatrix() {
         Random random = new Random();
-        matrix = IntStream.range(0, rows).mapToObj(i ->
-                random.ints(cols, 0, MAX_RANDOM_VALUE).toArray()
-        ).toArray(int[][]::new);
+        matrix = new int[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix[i][j] = random.nextInt(MAX_RANDOM_VALUE);
+            }
+        }
     }
 
     public void displayMatrix() {
@@ -37,6 +40,6 @@ public class Matrix {
     }
 
     public String toString() {
-        return "[rows: " + rows + "; cols: " + cols + "]";
+        return "Matrix[rows: " + rows + "; cols: " + cols + "]";
     }
 }

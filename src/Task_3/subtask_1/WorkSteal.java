@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 import static Task_3.subtask_1.Utils.FindMinInRows.findMinInRows;
 
 public class WorkSteal extends RecursiveTask<Integer> {
-    private static final int THRESHOLD = 100;
+    private static final int THRESHOLD = 1;
     private final int[][] matrix;
     private final int startRow, endRow, targetValue;
 
