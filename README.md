@@ -47,4 +47,4 @@
 
 Результати:
 
-1[](misc/result3.png)
+![](misc/result3.png)
