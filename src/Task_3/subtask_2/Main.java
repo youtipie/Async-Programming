@@ -1,32 +1,55 @@
 package Task_3.subtask_2;
 
-import Task_3.subtask_2.Tasks.DirectoryProcessorTask;
-import Task_3.subtask_2.Utils.UserPath;
+import Task_3.Utils.CalcTime;
+import Task_3.Utils.SimulateDelay;
 
-import java.io.File;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
 
     public static void main(String[] args) {
-        File path = UserPath.getUserPath();
+        long start = System.currentTimeMillis();
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
-        DirectoryProcessorTask task = new DirectoryProcessorTask(path);
-
-        long startTime = System.currentTimeMillis();
-        List<FileCharactersCount> results = forkJoinPool.invoke(task);
-        long endTime = System.currentTimeMillis();
-
-        if (results.size() > 0) {
-            for (FileCharactersCount result : results) {
-                System.out.println("Файл: " + result.getFileName() + ", Кількість символів: " + result.getCharCount());
-            }
-        } else {
-            System.out.println("Текстових файлів не знайдено.");
+        double[] sequence = new double[20];
+        Random rand = new Random();
+        for (int i = 0; i < sequence.length; i++) {
+            sequence[i] = rand.nextDouble() * 20;
         }
 
-        System.out.println("Час виконання: " + (endTime - startTime) + " ms");
+        System.out.println("Initial Sequence of Real Numbers:");
+        System.out.println(Arrays.toString(sequence));
+
+        CompletableFuture<Double> sumFuture = CompletableFuture.supplyAsync(() -> {
+            CalcTime.startTracking();
+            double sum = 0;
+            for (double num : sequence) {
+                sum += num;
+                SimulateDelay.sleep(10);
+            }
+            CalcTime.printElapsedTime("Calculating sum");
+            return sum;
+        });
+
+        CompletableFuture<Double> averageFuture = sumFuture.thenApplyAsync(sum -> {
+            CalcTime.startTracking();
+            double average = sum / sequence.length;
+            SimulateDelay.sleep(500);
+            CalcTime.printElapsedTime("Calculating average");
+            return average;
+        });
+
+        sumFuture.thenAcceptAsync(sum -> {
+            System.out.println("Sum of the sequence: " + sum);
+        });
+
+        averageFuture.thenAcceptAsync(average -> {
+            System.out.println("Average of the sequence: " + average);
+        });
+
+        CompletableFuture.allOf(sumFuture, averageFuture).join();
+
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println("Total execution took " + elapsed + " ms");
     }
 }

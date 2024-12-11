@@ -1,45 +1,65 @@
 package Task_3.subtask_1;
 
+import Task_3.Utils.CalcTime;
+import Task_3.Utils.SimulateDelay;
 
-import Task_3.subtask_1.Utils.UserMatrix;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import java.util.concurrent.*;
+import static Task_3.subtask_1.Utils.RandomChar.generateRandomChar;
 
 public class Main {
 
     public static void main(String[] args) {
-        Matrix matrix = UserMatrix.getUserMatrix();
-        matrix.displayMatrix();
+        long start = System.currentTimeMillis();
 
-        int firstElement = matrix.matrix[0][0];
-        int targetValue = firstElement * 2;
+        CompletableFuture<Character[]> createArrayFuture = CompletableFuture.supplyAsync(() -> {
+            CalcTime.startTracking();
+            Character[] array = new Character[20];
+            for (int i = 0; i < array.length; i++) {
+                SimulateDelay.sleep(10);
+                array[i] = generateRandomChar();
+            }
+            System.out.println("Initial array: " + Arrays.toString(array));
+            CalcTime.printElapsedTime("Array creation");
+            return array;
+        });
 
-        ForkJoinPool forkJoinPool = new ForkJoinPool();
-        long startTimeStealing = System.currentTimeMillis();
-        int resultStealing = forkJoinPool.invoke(new WorkSteal(matrix.matrix, 0, matrix.matrix.length, targetValue));
-        long endTimeStealing = System.currentTimeMillis();
+        CompletableFuture<Void> processArrayFuture = createArrayFuture.thenApplyAsync(array -> {
+            CalcTime.startTracking();
+            List<Character> letters = new ArrayList<>();
+            List<Character> whitespaces = new ArrayList<>();
+            List<Character> others = new ArrayList<>();
 
-        System.out.println("Намагаюсь найти " + targetValue + ":");
+            for (char ch : array) {
+                if (Character.isLetter(ch)) {
+                    letters.add(ch);
+                } else if (Character.isWhitespace(ch)) {
+                    whitespaces.add(ch);
+                } else {
+                    others.add(ch);
+                }
+                SimulateDelay.sleep(10);
+            }
 
-        if (resultStealing == Integer.MAX_VALUE) {
-            System.out.println("Work Stealing нічого не найшов");
-        } else {
-            System.out.println("Work Stealing результат: " + resultStealing);
-        }
-        System.out.println("Work Stealing час виконання: " + (endTimeStealing - startTimeStealing) + " ms");
+            CalcTime.printElapsedTime("Processing array");
+            return Arrays.asList(letters, whitespaces, others);
+        }).thenAcceptAsync(results -> {
+            CalcTime.startTracking();
+            System.out.println("Letters: " + results.get(0));
+            System.out.println("Whitespaces: " + results.get(1));
+            System.out.println("Others: " + results.get(2));
+            CalcTime.printElapsedTime("Printing results");
+        });
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        long startTimeDealing = System.currentTimeMillis();
-        int resultDealing = WorkDeal.findMinWithWorkDealing(executorService, matrix.matrix, targetValue);
-        long endTimeDealing = System.currentTimeMillis();
+        processArrayFuture.thenRunAsync(() -> {
+            System.out.println("All tasks completed.");
+        });
 
-        if (resultStealing == Integer.MAX_VALUE) {
-            System.out.println("Work Dealing нічого не найшов");
-        } else {
-            System.out.println("Work Dealing результат: " + resultDealing);
-        }
-        System.out.println("Work Dealing час виконання: " + (endTimeDealing - startTimeDealing) + " ms");
-
-        executorService.shutdown();
+        processArrayFuture.join();
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println("Total execution took " + elapsed + " ms");
     }
 }
