@@ -3,3 +3,4 @@
 - [Практична робота №1](https://github.com/youtipie/Async-Programming/tree/task_1)
 - [Практична робота №2](https://github.com/youtipie/Async-Programming/tree/task_2)
 - [Практична робота №3](https://github.com/youtipie/Async-Programming/tree/task_3)
+- [Практична робота №4](https://github.com/youtipie/Async-Programming/tree/task_4)
