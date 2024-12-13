@@ -11,43 +11,54 @@ public class Main {
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
 
-        double[] sequence = new double[20];
-        Random rand = new Random();
-        for (int i = 0; i < sequence.length; i++) {
-            sequence[i] = rand.nextDouble() * 20;
-        }
-
-        System.out.println("Initial Sequence of Real Numbers:");
-        System.out.println(Arrays.toString(sequence));
-
-        CompletableFuture<Double> sumFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<List<Double>> randomNumbersFuture = CompletableFuture.supplyAsync(() -> {
             CalcTime.startTracking();
-            double sum = 0;
-            for (double num : sequence) {
-                sum += num;
+            Random random = new Random();
+            List<Double> numbers = new ArrayList<>();
+            for (int i = 0; i < 20; i++) {
+                numbers.add(random.nextDouble() * 100);
                 SimulateDelay.sleep(10);
             }
-            CalcTime.printElapsedTime("Calculating sum");
-            return sum;
+            CalcTime.printElapsedTime("Generating random numbers");
+            return numbers;
         });
 
-        CompletableFuture<Double> averageFuture = sumFuture.thenApplyAsync(sum -> {
+        CompletableFuture<List<Double>> differencesFuture = randomNumbersFuture.thenApplyAsync(numbers -> {
             CalcTime.startTracking();
-            double average = sum / sequence.length;
-            SimulateDelay.sleep(500);
-            CalcTime.printElapsedTime("Calculating average");
-            return average;
+            List<Double> differences = new ArrayList<>();
+            for (int i = 0; i < numbers.size() - 1; i++) {
+                differences.add(Math.abs(numbers.get(i) - numbers.get(i + 1)));
+                SimulateDelay.sleep(10);
+            }
+            CalcTime.printElapsedTime("Computing absolute differences");
+            return differences;
         });
 
-        sumFuture.thenAcceptAsync(sum -> {
-            System.out.println("Sum of the sequence: " + sum);
+        CompletableFuture<Double> maxDifferenceFuture = differencesFuture.thenApplyAsync(differences -> {
+            CalcTime.startTracking();
+            double maxDifference = 0.0;
+            for (double difference : differences) {
+                if (difference > maxDifference) {
+                    maxDifference = difference;
+                    SimulateDelay.sleep(10);
+                }
+            }
+            CalcTime.printElapsedTime("Finding maximum difference");
+            return maxDifference;
         });
 
-        averageFuture.thenAcceptAsync(average -> {
-            System.out.println("Average of the sequence: " + average);
+        CompletableFuture<Void> printResultsFuture = randomNumbersFuture.thenAcceptAsync(numbers -> {
+            System.out.println("Generated numbers: " + Arrays.toString(numbers.toArray()));
+        }).thenRunAsync(() -> {
+            System.out.println("Random numbers printed successfully.");
         });
 
-        CompletableFuture.allOf(sumFuture, averageFuture).join();
+        CompletableFuture<Void> printMaxDifferenceFuture = maxDifferenceFuture.thenAcceptAsync(maxDifference -> {
+            System.out.println("Maximum absolute difference: " + maxDifference);
+        });
+
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(printResultsFuture, printMaxDifferenceFuture);
+        allTasks.join();
 
         long elapsed = System.currentTimeMillis() - start;
         System.out.println("Total execution took " + elapsed + " ms");
